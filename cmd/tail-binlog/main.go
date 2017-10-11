@@ -52,9 +52,9 @@ func read(events chan interface{}) (string, error) {
 		case mysqlbinlog.QueryEvent:
 			dbName, sqlStatement := ev.SQL()
 			q := Query{
-				Timestamp:    ev.UnixTimestamp(),
-				NextPosition: ev.NextPosition(),
-				ServerID:     ev.ServerID(),
+				Timestamp:    ev.Header.UnixTimestamp(),
+				NextPosition: ev.Header.Int64NextPosition(),
+				ServerID:     ev.Header.Int64ServerID(),
 				ThreadID:     ev.ThreadID(),
 				QueryTime:    ev.QueryTime(),
 				ErrorCode:    ev.ErrorCode(),
