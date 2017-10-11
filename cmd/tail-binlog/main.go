@@ -83,7 +83,6 @@ func read(events chan interface{}) (string, error) {
 
 func isExist(filename string) bool {
 	_, err := os.Stat(filename)
-	fmt.Println(err)
 	return err == nil
 }
 
