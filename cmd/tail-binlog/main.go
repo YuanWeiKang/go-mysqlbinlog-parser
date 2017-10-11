@@ -24,9 +24,11 @@ type Query struct {
 	SQLStatement string `json:"sql"`
 }
 
+var reader *mysqlbinlog.Reader
+
 var (
 	binlog         string
-	startPos       int
+	startPos       int64
 	output         string
 	follow         bool
 	followNextFile bool
@@ -50,6 +52,11 @@ func read(events chan interface{}) (string, error) {
 	for event := range events {
 		switch ev := event.(type) {
 		case mysqlbinlog.QueryEvent:
+
+			if reader.CurrentBinlog() == binlog && ev.Header.Int64NextPosition() < startPos {
+				continue
+			}
+
 			dbName, sqlStatement := ev.SQL()
 			q := Query{
 				Timestamp:    ev.Header.UnixTimestamp(),
@@ -88,7 +95,7 @@ func isExist(filename string) bool {
 
 func main() {
 	flag.StringVar(&binlog, "file", "", "")
-	flag.IntVar(&startPos, "p", 0, "")
+	flag.Int64Var(&startPos, "p", 0, "")
 	flag.StringVar(&output, "o", "", "")
 	flag.BoolVar(&follow, "f", false, "")
 	flag.BoolVar(&followNextFile, "F", false, "")
@@ -99,8 +106,7 @@ func main() {
 	}
 
 	var (
-		reader *mysqlbinlog.Reader
-		err    error
+		err error
 	)
 
 	binlogDir := filepath.Dir(binlog)

@@ -57,6 +57,10 @@ func (r *Reader) Close() {
 	}
 }
 
+func (r *Reader) CurrentBinlog() string {
+	return r.binlog.Name()
+}
+
 func (r *Reader) CurrentPosition() int64 {
 	return r.position
 }
